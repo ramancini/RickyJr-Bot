@@ -5,7 +5,7 @@ import discord
 from discord import app_commands
 
 # Set up logging
-handler = logging.FileHandler(filename='bot.log', encoding='utf-8', mode='w')
+handler = logging.FileHandler(filename='data/bot.log', encoding='utf-8', mode='w')
 dt_fmt = '%Y-%m-%d %H:%M:%S'
 formatter = logging.Formatter('[{asctime}] [{levelname:<8}] {name}: {message}', dt_fmt, style='{')
 handler.setFormatter(formatter)
@@ -15,9 +15,10 @@ logger.setLevel(logging.DEBUG)
 logger.addHandler(handler)
 
 # Load environment variables
-load_dotenv()
+load_dotenv(dotenv_path='data/.env')
 TOKEN = os.getenv('TOKEN')
-
+GUILD_ID = os.getenv('GUILD_ID')
+DEV_ID = os.getenv('DEV_ID')
 
 # Define Client class
 class AClient(discord.Client):
