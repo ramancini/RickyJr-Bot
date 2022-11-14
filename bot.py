@@ -4,6 +4,12 @@ from dotenv import load_dotenv
 import discord
 from discord import app_commands
 
+import re
+import numpy as np
+import PIL
+from PIL import Image
+from io import BytesIO
+
 # Set up logging
 handler = logging.FileHandler(filename='data/bot.log', encoding='utf-8', mode='w')
 dt_fmt = '%Y-%m-%d %H:%M:%S'
@@ -33,10 +39,52 @@ class AClient(discord.Client):
             self.synced = True
         print(f'We have logged in as {self.user}')
 
+# Hex String to RGB converter
+def hex_to_rgb(hex):
+    hex = hex.lstrip('#')
+    hlen = len(hex)
+    return tuple(int(hex[i:i+hlen//3], 16) for i in range(0, hlen, hlen//3))
+
+# Convert RGB to a 128 by 128 image
+def rgb_to_image(rgb):
+    img = PIL.Image.new('RGB', (256, 256), color=rgb)
+    return img
 
 # Create client and command tree
 client = AClient()
 tree = app_commands.CommandTree(client)
+
+# Create command to display color patch based on hex code
+@tree.command(name='hex2color', description='Display a color patch based on a hex code')
+async def hex2color(interaction: discord.Interaction, hexcode: str):
+    # Check if hexcode is valid
+    if not re.match("^(#)?([A-Fa-f0-9]){6}$", hexcode):
+        await interaction.response.send_message('That is not a valid hex code!', ephemeral=True)
+        return
+
+    # Convert hex to RGB
+    rgb = hex_to_rgb(hexcode)
+
+    # Create image
+    img = rgb_to_image(rgb)
+
+    with BytesIO() as image_binary:
+        img.save(image_binary, 'PNG')
+        image_binary.seek(0)
+
+        # Create embed
+        embed = discord.Embed(
+            title=f'Generated color patch for {hexcode}',
+            color=discord.Color.from_rgb(*rgb),
+        )
+        embed.add_field(name='RGB Color Code', value=f'{rgb[0]}, {rgb[1]}, {rgb[2]}')
+        embed.add_field(name='Hex Color Code', value=hexcode)
+
+        embed.set_image(url='attachment://color.png')
+
+        # Send embed
+        await interaction.response.send_message(embed=embed, file=discord.File(fp=image_binary, filename='color.png'))
+
 
 # Start the bot
 if __name__ == '__main__':
