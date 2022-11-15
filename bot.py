@@ -109,7 +109,7 @@ async def rgb2color(interaction: discord.Interaction, r: int, g: int, b: int):
 
         # Create embed
         embed = discord.Embed(
-            title=f'Generated color patch for R: {r}, G: {g}, B: {b}',
+            title=f'Generated color patch for ({r}, {g}, {b})',
             color=discord.Color.from_rgb(r, g, b),
         )
         embed.add_field(name='RGB Color Code', value=f'{r}, {g}, {b}')
