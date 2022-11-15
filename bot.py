@@ -62,6 +62,10 @@ async def hex2color(interaction: discord.Interaction, hexcode: str):
         await interaction.response.send_message('That is not a valid hex code!', ephemeral=True)
         return
 
+    # Check if hexcode has a # in front
+    if hexcode[0] != '#':
+        hexcode = '#' + hexcode
+
     # Convert hex to RGB
     rgb = hex_to_rgb(hexcode)
 
@@ -85,6 +89,36 @@ async def hex2color(interaction: discord.Interaction, hexcode: str):
         # Send embed
         await interaction.response.send_message(embed=embed, file=discord.File(fp=image_binary, filename='color.png'))
 
+# Create command to display color patch based on RGB code
+@tree.command(name='rgb2color', description='Display a color patch based on RGB values')
+async def rgb2color(interaction: discord.Interaction, r: int, g: int, b: int):
+    # Check if RGB values are valid
+    if not (0 <= r <= 255 and 0 <= g <= 255 and 0 <= b <= 255):
+        await interaction.response.send_message('That is not a valid RGB code!', ephemeral=True)
+        return
+
+    # Convert RGB to hex
+    hexcode = '#%02x%02x%02x' % (r, g, b)
+
+    # Create image
+    img = rgb_to_image((r, g, b))
+
+    with BytesIO() as image_binary:
+        img.save(image_binary, 'PNG')
+        image_binary.seek(0)
+
+        # Create embed
+        embed = discord.Embed(
+            title=f'Generated color patch for R: {r}, G: {g}, B: {b}',
+            color=discord.Color.from_rgb(r, g, b),
+        )
+        embed.add_field(name='RGB Color Code', value=f'{r}, {g}, {b}')
+        embed.add_field(name='Hex Color Code', value=hexcode)
+
+        embed.set_image(url='attachment://color.png')
+
+        # Send embed
+        await interaction.response.send_message(embed=embed, file=discord.File(fp=image_binary, filename='color.png'))
 
 # Start the bot
 if __name__ == '__main__':
