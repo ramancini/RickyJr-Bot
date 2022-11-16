@@ -50,6 +50,28 @@ def rgb_to_image(rgb):
     img = PIL.Image.new('RGB', (256, 256), color=rgb)
     return img
 
+# Convert RGB to HSV
+def rgb_to_hsv(rgb):
+    r, g, b = rgb
+    r, g, b = r/255.0, g/255.0, b/255.0
+    cmax = max(r, g, b)
+    cmin = min(r, g, b)
+    diff = cmax-cmin
+    if cmax == cmin:
+        h = 0
+    elif cmax == r:
+        h = (60 * ((g-b)/diff) + 360) % 360
+    elif cmax == g:
+        h = (60 * ((b-r)/diff) + 120) % 360
+    elif cmax == b:
+        h = (60 * ((r-g)/diff) + 240) % 360
+    if cmax == 0:
+        s = 0
+    else:
+        s = (diff/cmax) * 100
+    v = cmax * 100
+    return h, s, v
+
 # Create client and command tree
 client = AClient()
 tree = app_commands.CommandTree(client)
@@ -69,6 +91,9 @@ async def hex2color(interaction: discord.Interaction, hexcode: str):
     # Convert hex to RGB
     rgb = hex_to_rgb(hexcode)
 
+    # Convert RGB to HSV
+    hsv = rgb_to_hsv(rgb)
+
     # Create image
     img = rgb_to_image(rgb)
 
@@ -81,7 +106,8 @@ async def hex2color(interaction: discord.Interaction, hexcode: str):
             title=f'Generated color patch for {hexcode}',
             color=discord.Color.from_rgb(*rgb),
         )
-        embed.add_field(name='RGB Color Code', value=f'{rgb[0]}, {rgb[1]}, {rgb[2]}')
+        embed.add_field(name='RGB Color Code', value=f'```R: {rgb[0]}\nG: {rgb[1]}\nB: {rgb[2]}```')
+        embed.add_field(name='HSV Color Code', value=f'```H: {round(hsv[0], 3)}°\nS: {round(hsv[1], 3)}%\nV: {round(hsv[2], 3)}%```')
         embed.add_field(name='Hex Color Code', value=hexcode)
 
         embed.set_image(url='attachment://color.png')
@@ -100,6 +126,9 @@ async def rgb2color(interaction: discord.Interaction, r: int, g: int, b: int):
     # Convert RGB to hex
     hexcode = '#%02x%02x%02x' % (r, g, b)
 
+    # Convert RGB to HSV
+    hsv = rgb_to_hsv((r, g, b))
+
     # Create image
     img = rgb_to_image((r, g, b))
 
@@ -112,7 +141,62 @@ async def rgb2color(interaction: discord.Interaction, r: int, g: int, b: int):
             title=f'Generated color patch for ({r}, {g}, {b})',
             color=discord.Color.from_rgb(r, g, b),
         )
-        embed.add_field(name='RGB Color Code', value=f'{r}, {g}, {b}')
+        embed.add_field(name='RGB Color Code', value=f'```R: {r}\nG: {g}\nB: {b}```')
+        embed.add_field(name='HSV Color Code', value=f'```H: {round(hsv[0], 3)}°\nS: {round(hsv[1], 3)}%\nV: {round(hsv[2], 3)}%```')
+        embed.add_field(name='Hex Color Code', value=hexcode)
+
+        embed.set_image(url='attachment://color.png')
+
+        # Send embed
+        await interaction.response.send_message(embed=embed, file=discord.File(fp=image_binary, filename='color.png'))
+
+# Create command to display color patch based on HSV code
+@tree.command(name='hsv2color', description='Display a color patch based on HSV values')
+async def hsv2color(interaction: discord.Interaction, h: float, s: float, v: float):
+    # Check if HSV values are valid
+    if not (0 <= h <= 360 and 0 <= s <= 100 and 0 <= v <= 100):
+        await interaction.response.send_message('That is not a valid HSV code!', ephemeral=True)
+        return
+
+    # Convert HSV to RGB
+    c = v * s
+    x = c * (1 - abs((h / 60) % 2 - 1))
+    m = v - c
+
+    if 0 <= h < 60:
+        r, g, b = c, x, 0
+    elif 60 <= h < 120:
+        r, g, b = x, c, 0
+    elif 120 <= h < 180:
+        r, g, b = 0, c, x
+    elif 180 <= h < 240:
+        r, g, b = 0, x, c
+    elif 240 <= h < 300:
+        r, g, b = x, 0, c
+    elif 300 <= h < 360:
+        r, g, b = c, 0, x
+    else:
+        r, g, b = 0, 0, 0
+
+    r, g, b = int((r + m) * 255), int((g + m) * 255), int((b + m) * 255)
+
+    # Convert RGB to hex
+    hexcode = '#%02x%02x%02x' % (r, g, b)
+
+    # Create image
+    img = rgb_to_image((r, g, b))
+
+    with BytesIO() as image_binary:
+        img.save(image_binary, 'PNG')
+        image_binary.seek(0)
+
+        # Create embed
+        embed = discord.Embed(
+            title=f'Generated color patch for ({h}°, {s}%, {v}%)',
+            color=discord.Color.from_rgb(r, g, b),
+        )
+        embed.add_field(name='RGB Color Code', value=f'```R: {r}\nG: {g}\nB: {b}```')
+        embed.add_field(name='HSV Color Code', value=f'```H: {round(h, 3)}°\nS: {round(s, 3)}%\nV: {round(v, 3)}%```')
         embed.add_field(name='Hex Color Code', value=hexcode)
 
         embed.set_image(url='attachment://color.png')
