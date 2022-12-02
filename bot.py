@@ -26,6 +26,7 @@ TOKEN = os.getenv('TOKEN')
 GUILD_ID = os.getenv('GUILD_ID')
 DEV_ID = os.getenv('DEV_ID')
 
+
 # Define Client class
 class AClient(discord.Client):
     def __init__(self):
@@ -39,42 +40,47 @@ class AClient(discord.Client):
             self.synced = True
         print(f'We have logged in as {self.user}')
 
+
 # Hex String to RGB converter
 def hex_to_rgb(hex):
     hex = hex.lstrip('#')
     hlen = len(hex)
-    return tuple(int(hex[i:i+hlen//3], 16) for i in range(0, hlen, hlen//3))
+    return tuple(int(hex[i:i + hlen // 3], 16) for i in range(0, hlen, hlen // 3))
+
 
 # Convert RGB to a 128 by 128 image
 def rgb_to_image(rgb):
     img = PIL.Image.new('RGB', (256, 256), color=rgb)
     return img
 
+
 # Convert RGB to HSV
 def rgb_to_hsv(rgb):
     r, g, b = rgb
-    r, g, b = r/255.0, g/255.0, b/255.0
+    r, g, b = r / 255.0, g / 255.0, b / 255.0
     cmax = max(r, g, b)
     cmin = min(r, g, b)
-    diff = cmax-cmin
+    diff = cmax - cmin
     if cmax == cmin:
         h = 0
     elif cmax == r:
-        h = (60 * ((g-b)/diff) + 360) % 360
+        h = (60 * ((g - b) / diff) + 360) % 360
     elif cmax == g:
-        h = (60 * ((b-r)/diff) + 120) % 360
+        h = (60 * ((b - r) / diff) + 120) % 360
     elif cmax == b:
-        h = (60 * ((r-g)/diff) + 240) % 360
+        h = (60 * ((r - g) / diff) + 240) % 360
     if cmax == 0:
         s = 0
     else:
-        s = (diff/cmax) * 100
+        s = (diff / cmax) * 100
     v = cmax * 100
     return h, s, v
+
 
 # Create client and command tree
 client = AClient()
 tree = app_commands.CommandTree(client)
+
 
 # Create command to display color patch based on hex code
 @tree.command(name='hex2color', description='Display a color patch based on a hex code')
@@ -107,13 +113,15 @@ async def hex2color(interaction: discord.Interaction, hexcode: str):
             color=discord.Color.from_rgb(*rgb),
         )
         embed.add_field(name='RGB Color Code', value=f'```R: {rgb[0]}\nG: {rgb[1]}\nB: {rgb[2]}```')
-        embed.add_field(name='HSV Color Code', value=f'```H: {round(hsv[0], 3)}°\nS: {round(hsv[1], 3)}%\nV: {round(hsv[2], 3)}%```')
+        embed.add_field(name='HSV Color Code',
+                        value=f'```H: {round(hsv[0], 3)}°\nS: {round(hsv[1], 3)}%\nV: {round(hsv[2], 3)}%```')
         embed.add_field(name='Hex Color Code', value=hexcode)
 
         embed.set_image(url='attachment://color.png')
 
         # Send embed
         await interaction.response.send_message(embed=embed, file=discord.File(fp=image_binary, filename='color.png'))
+
 
 # Create command to display color patch based on RGB code
 @tree.command(name='rgb2color', description='Display a color patch based on RGB values')
@@ -142,13 +150,15 @@ async def rgb2color(interaction: discord.Interaction, r: int, g: int, b: int):
             color=discord.Color.from_rgb(r, g, b),
         )
         embed.add_field(name='RGB Color Code', value=f'```R: {r}\nG: {g}\nB: {b}```')
-        embed.add_field(name='HSV Color Code', value=f'```H: {round(hsv[0], 3)}°\nS: {round(hsv[1], 3)}%\nV: {round(hsv[2], 3)}%```')
+        embed.add_field(name='HSV Color Code',
+                        value=f'```H: {round(hsv[0], 3)}°\nS: {round(hsv[1], 3)}%\nV: {round(hsv[2], 3)}%```')
         embed.add_field(name='Hex Color Code', value=hexcode)
 
         embed.set_image(url='attachment://color.png')
 
         # Send embed
         await interaction.response.send_message(embed=embed, file=discord.File(fp=image_binary, filename='color.png'))
+
 
 # Create command to display color patch based on HSV code
 @tree.command(name='hsv2color', description='Display a color patch based on HSV values')
@@ -203,6 +213,7 @@ async def hsv2color(interaction: discord.Interaction, h: float, s: float, v: flo
 
         # Send embed
         await interaction.response.send_message(embed=embed, file=discord.File(fp=image_binary, filename='color.png'))
+
 
 # Start the bot
 if __name__ == '__main__':
