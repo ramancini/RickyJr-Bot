@@ -5,7 +5,7 @@ It is currently in development. Contributions are more than welcome!
 
 ## Features
 
-A list of all commands and features can be found on the GitHub wiki.
+A list of all commands and features will be able to be found on the GitHub wiki in the future.
 
 ## Important Information
 
@@ -68,6 +68,7 @@ A list of all commands and features can be found on the GitHub wiki.
     TOKEN=<your bot token>
     GUILD_ID=<your discord server id>
     DEV_ID=<your discord user id>
+    APPLICATION_ID=<your discord application id>
     ```
 
 *This bot was set up using Pebblehost as a host.*
