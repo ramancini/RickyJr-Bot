@@ -3,6 +3,17 @@ RickyJr is an Imaging Science discord bot, designed to do a variety of simple Im
 
 It is currently in development. Contributions are more than welcome!
 
+## Note From the Developer
+> It is important to keep in mind that this bot is meant for a small Imaging Science discord server. Because of this, the bot will most likely need some minor reworking to work for any other
+servers. I have tried my best to make everything as general as possible so that it can be used for other servers, but I can't guarantee that it will work for all servers.
+> 
+> Because of the small scale of the server, I opted to store data in json files, rather than a database. While this might not be ideal, it is a lot easier to work with for a small server.
+> If you would like to use this bot for a larger server or on a larger scale, I would recommend using a database, to store the data.
+>
+> If you would like to implement database support or fix issues with the bot in regard to multi-server support, I would be more than happy to accept a pull request.
+
+
+
 ## Features
 
 A list of all commands and features will be able to be found on the GitHub wiki in the future.
