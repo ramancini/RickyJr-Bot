@@ -1,6 +1,7 @@
 import os
+import logging
+from logging import handlers
 
-from discord import app_commands
 from dotenv import load_dotenv
 import discord
 from discord.ext import commands
@@ -11,6 +12,18 @@ TOKEN = os.getenv('TOKEN')
 GUILD_ID = os.getenv('GUILD_ID')
 DEV_ID = os.getenv('DEV_ID')
 APP_ID = os.getenv('APPLICATION_ID')
+
+# Check for the logs directory and create it if it doesn't exist
+if not os.path.exists('logs'):
+    os.mkdir('logs')
+
+# Set up rotating log file which generates a new file every day (Currently saves up to 7 days)
+logHandler = handlers.TimedRotatingFileHandler('logs/bot.log', when='midnight', backupCount=7)
+logHandler.suffix = '%Y_%m_%d'
+
+# Formatting for log file
+date_format = '%d-%m-%Y %H:%M:%S'
+formatter = logging.Formatter('[{asctime}] [{levelname:<8}] {name}: {message}', date_format, style='{')
 
 
 class RickyJr(commands.Bot):
@@ -34,6 +47,7 @@ class RickyJr(commands.Bot):
 
 bot = RickyJr()
 
+
 @bot.command(name='reload')
 async def reload(ctx):
     if ctx.author.id == int(DEV_ID):
@@ -46,4 +60,5 @@ async def reload(ctx):
     else:
         await ctx.send('You are not permitted to use this command')
 
-bot.run(TOKEN)
+
+bot.run(TOKEN, log_handler=logHandler, log_formatter=formatter, log_level=logging.INFO)
