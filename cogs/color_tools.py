@@ -44,7 +44,7 @@ def rgb_to_hsv(rgb):
     return h, s, v
 
 
-class ColorTools(commands.Cog):
+class ColorTools(commands.GroupCog, group_name='colortools', group_description='Commands dealing with colors and color science'):
     def __init__(self, bot):
         self.bot = bot
 
