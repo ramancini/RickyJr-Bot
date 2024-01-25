@@ -38,6 +38,7 @@ class RickyJr(commands.Bot):
         for filename in os.listdir('./cogs'):
             if filename.endswith('.py'):
                 await self.load_extension(f'cogs.{filename[:-3]}')
+                print(f'Loaded {filename[:-3]}')
         await bot.tree.sync()
 
     async def on_ready(self):

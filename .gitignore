@@ -131,3 +131,6 @@ dmypy.json
 
 # .idea folder
 .idea/
+
+# openai prompt
+prompt.json
