@@ -34,11 +34,10 @@ class DatabaseOperations:
             # Create tables if they don't exist
             try:
                 self.cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS `message_logs` (
+                    CREATE TABLE IF NOT EXISTS `thread_ids` (
                         `user_id` BIGINT UNSIGNED NOT NULL,
-                        `timestamp` DATETIME NOT NULL,
-                        `role` VARCHAR(255) NOT NULL,
-                        `content` VARCHAR(255) NOT NULL
+                        `thread_id` VARCHAR(255) NOT NULL
+                        PRIMARY KEY (user_id)
                     );
                 ''')
             except mysql.connector.Error as err:
@@ -58,6 +57,39 @@ class DatabaseOperations:
             #         DELETE FROM `message_logs`
             #         WHERE `timestamp` < DATE_SUB(NOW(), INTERVAL 1 WEEK);
             # ''')
+                
+    def get_thread(self, user_id: int):
+        """
+        Gets the thread id attached to the user id. Returns None type if user id is not found
+        """
+        with DatabaseConnection() as self.cursor:
+            self.cursor.execute('''
+                SELECT `thread_id`
+                FROM `thread_ids`
+                WHERE `user_id` = %s
+            ''', (user_id,))
+            thread_id = self.cursor.fetchone()
+            return thread_id
+
+    def add_thread(self, user_id: int, thread_id: str):
+        """
+        Adds a thread id to the database
+        """
+        with DatabaseConnection() as self.cursor:
+            self.cursor.execute('''
+                INSERT INTO `thread_ids` (`user_id`, `thread_id`)
+                VALUES (%s, %s)
+            ''', (user_id, thread_id))
+    
+    def delete_thread(self, user_id: int):
+        """
+        Deletes a thread id from the database
+        """
+        with DatabaseConnection() as self.cursor:
+            self.cursor.execute('''
+                DELETE FROM `thread_ids`
+                WHERE `user_id` = %s
+            ''', (user_id,))
 
     def add_message(self, user_id: int, timestamp: datetime, role: str, content: str):
         """

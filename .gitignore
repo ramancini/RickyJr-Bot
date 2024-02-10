@@ -134,3 +134,6 @@ dmypy.json
 
 # openai prompt
 prompt.json
+
+# vscode
+.vscode/
