@@ -128,3 +128,12 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Prompt
+prompt.json
+
+# VSCode debug launcher
+launch.json
+
+# Ideafile
+.idea
