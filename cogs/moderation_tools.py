@@ -81,6 +81,17 @@ class ModTools(commands.Cog):
         else:
             await interaction.response.send_message("User already has 3 strikes! Maybe it's time for a ban...", ephemeral=True)
             return
+
+    @app_commands.command(name='echo', description='Send a message to a channel')
+    async def echo(self, interaction: discord.Interaction, channel: discord.TextChannel, message: str):
+        # Check if user has permission to use this command
+        if not interaction.user.guild_permissions.manage_messages:
+            await interaction.response.send_message('You do not have permission to use this command!', ephemeral=True)
+            return
+
+        # Send message
+        await channel.send(message)
+        await interaction.response.send_message(f"Sent message to {channel.mention}", ephemeral=True)
         
 
 async def setup(bot: commands.Bot) -> None:
