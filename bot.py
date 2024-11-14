@@ -6,12 +6,15 @@ from dotenv import load_dotenv
 import discord
 from discord.ext import commands
 
+import datetime
+
 # Load environment variables
 load_dotenv(dotenv_path='data/.env')
 TOKEN = os.getenv('TOKEN')
 GUILD_ID = os.getenv('GUILD_ID')
 DEV_ID = os.getenv('DEV_ID')
 APP_ID = os.getenv('APPLICATION_ID')
+REACT_USER_ID = int(os.getenv('REACT_USER_ID'))
 
 # Check for the logs directory and create it if it doesn't exist
 if not os.path.exists('logs'):
@@ -43,6 +46,14 @@ class RickyJr(commands.Bot):
     async def on_ready(self):
         await self.wait_until_ready()
         print(f'We have logged in as {self.user}')
+
+    async def on_reaction_add(self, reaction, user):
+        if user.id == REACT_USER_ID:
+            # Calculate the difference between when a message was sent and when it was reacted to
+            time_diff = datetime.datetime.now().astimezone(datetime.timezone.utc) - reaction.message.created_at
+            
+            # Send the time difference in the channel the message was sent in
+            await reaction.message.channel.send(f"Mason reacted in {time_diff.total_seconds():.3f} seconds")
 
 
 bot = RickyJr()
